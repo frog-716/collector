@@ -1,6 +1,6 @@
 /**
  * Selector — visual element picker with per-element annotations.
- * Inject via bookmarklet. Click = select, Shift+click = multi, Drag = marquee.
+ * Inject via bookmarklet. Click = select, ⌘/Shift+click = multi, Drag = marquee.
  */
 (function () {
   "use strict";

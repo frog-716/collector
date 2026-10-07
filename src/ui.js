@@ -406,7 +406,7 @@
     const markdownShortcut = HOST.pageShortcuts === true ? formatPageShortcut(settings.shortcutMarkdown) : (isMacPlatform() ? "\u2318M" : "Ctrl+M");
     const items = [
       `<span><kbd>Click</kbd> ${t("skSelect")}</span>`,
-      `<span><kbd>Shift</kbd> ${t("skMulti")}</span>`,
+      `<span><kbd>${isMacPlatform() ? "\u2318" : "Shift"}</kbd> ${t("skMulti")}</span>`,
       `<span><kbd>\u2190\u2191\u2192\u2193</kbd> ${t("skNavigate")}</span>`,
       `<span><kbd>${copyShortcut}</kbd> ${t("skCopy")}</span>`,
       `<span><kbd>${screenshotShortcut}</kbd> ${t("skScreenshot")}</span>`,

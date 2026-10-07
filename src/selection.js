@@ -91,6 +91,11 @@
   }
 
   // ── Mouse handling ───────────────────────────────────────────
+  // Multi-select modifier: ⌘ (Finder-style on macOS) with Shift kept for
+  // backward compatibility with the original shortcut. Caveat: on a real
+  // <a href> the browser itself handles ⌘+Click ("open in new tab") and a
+  // page script cannot cancel that — Shift stays the safe choice on links.
+  function isMultiSelectModifier(e) { return !!(e && (e.metaKey || e.shiftKey)); }
   function handleMouseMove(e) {
     if (minimized || paused) return;
     if (dragState) {
@@ -112,7 +117,7 @@
   }
   function handleMouseDown(e) {
     if (isEditorElement(e.target) || minimized || paused || e.button !== 0) return;
-    if (e.shiftKey) e.preventDefault();
+    if (isMultiSelectModifier(e)) e.preventDefault();
     dragState = { startX: e.clientX, startY: e.clientY, isDragging: false, marquee: null };
   }
   function handleMouseUp(e) {
@@ -120,7 +125,7 @@
     wasJustDragging = true;
     const mRect = dragState.marquee.getBoundingClientRect();
     dragState.marquee.remove(); dragState = null;
-    pushHistory(); if (!e.shiftKey) clearSelection();
+    pushHistory(); if (!isMultiSelectModifier(e)) clearSelection();
     document.querySelectorAll(`[${AI_ID}]`).forEach(el => {
       if (isEditorElement(el) || !isVisible(el) || !isMeaningful(el)) return;
       if (rectsIntersect(mRect, el.getBoundingClientRect())) addSelection(el);
@@ -134,7 +139,7 @@
     e.preventDefault(); e.stopPropagation(); removeAnnotationPopover();
     const sel = window.getSelection(); if (sel) sel.removeAllRanges();
     pushHistory(); const el = resolveNestedTargetFromSelection(e) || resolveTarget(resolveEventTarget(e));
-    if (e.shiftKey) toggleElement(el); else { clearUnannotatedSelections(); addSelection(el); }
+    if (isMultiSelectModifier(e)) toggleElement(el); else { clearUnannotatedSelections(); addSelection(el); }
     updateTags();
   }
 
