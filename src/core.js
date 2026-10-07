@@ -1,6 +1,6 @@
 /**
- * Selector — visual element picker with per-element annotations.
- * Inject via bookmarklet. Click = select, ⌘/Shift+click = multi, Drag = marquee.
+ * collector — visual element picker with per-element annotations.
+ * Inject via bookmarklet. Click = select, Shift+click = multi, Drag = marquee.
  */
 (function () {
   "use strict";
@@ -8,8 +8,8 @@
   // second activation shortcut. Prefer a soft resume over a no-op.
   if (document.querySelector(".ai-editor-root")) {
     try {
-      if (typeof window.__SELECTOR_ON_REACTIVATE__ === "function") {
-        window.__SELECTOR_ON_REACTIVATE__();
+      if (typeof window.__COLLECTOR_ON_REACTIVATE__ === "function") {
+        window.__COLLECTOR_ON_REACTIVATE__();
       }
     } catch (_) {}
     return;
@@ -17,19 +17,22 @@
 
   const NS = "ai-editor";
   // ── Host capability seam (HOST_CONTRACT.md §0/§1) ────────────
-  // The closed-source extension injects window.__SELECTOR_HOST__ in the MAIN
+  // An external host extension can inject window.__COLLECTOR_HOST__ in the MAIN
   // world before this core runs, supplying stronger implementations (cross-tab
   // capture, cross-origin asset fetch, extra UI rows, ...).
-  // For the free bookmarklet __SELECTOR_HOST__ is undefined → HOST = {} → every
+  // NOTE: the upstream Selector Pro extension publishes its host under the old
+  // name (window.__SELECTOR_HOST__). This fork renamed the seam, so that
+  // integration is deliberately no longer wired up.
+  // For the free bookmarklet __COLLECTOR_HOST__ is undefined → HOST = {} → every
   // seam below falls through to its existing else-branch and behaves exactly as
   // before. Each Host method is OPTIONAL: callers must always keep the original
   // logic as the fallback. Never make a path Host-only.
-  const HOST = (typeof window !== "undefined" && window.__SELECTOR_HOST__) || {};
+  const HOST = (typeof window !== "undefined" && window.__COLLECTOR_HOST__) || {};
   const AI_ID = "data-ai-id";
   const VERSION = "0.4.1";
   // Cross-link targets for the settings-panel promo (bookmarklet ⇄ Pro extension).
   const EXT_LANDING_URL = "https://selector-pro.org/";
-  const BOOKMARKLET_URL = "https://oil-oil.github.io/selector/";
+  const BOOKMARKLET_URL = "https://frog-716.github.io/collector/";
   // Keep the bookmarklet's pause behavior and visible shortcut hint sourced
   // from one value so they cannot drift apart again.
   const PAUSE_SHORTCUT_KEY = "F2";
@@ -219,7 +222,7 @@
             }
           }
         }
-        if (addedPageContent) scheduleSelectorLayerRefresh();
+        if (addedPageContent) scheduleCollectorLayerRefresh();
       });
       domObserver.observe(document.documentElement, { childList: true, subtree: true });
     } catch (_) {}
@@ -227,17 +230,17 @@
     // Extension hooks: Pro can destroy/resume this instance after SPA nav or
     // a second activation shortcut without leaving orphan listeners behind.
     try {
-      window.__SELECTOR_DESTROY__ = destroy;
-      window.__SELECTOR_ON_REACTIVATE__ = function () {
+      window.__COLLECTOR_DESTROY__ = destroy;
+      window.__COLLECTOR_ON_REACTIVATE__ = function () {
         try {
-          bringSelectorLayerToFront();
+          bringCollectorLayerToFront();
           if (minimized) toggleMinimize();
           if (paused) togglePaused();
         } catch (_) {}
       };
       // Same-document navigation (SPA/history) must look like a full reload:
       // keep the panel and synced preferences, discard page-specific UI state.
-      window.__SELECTOR_ON_NAVIGATION__ = function () {
+      window.__COLLECTOR_ON_NAVIGATION__ = function () {
         try {
           showHover(null);
           cancelDrag();
@@ -252,7 +255,7 @@
           updateTags();
         } catch (_) {}
       };
-      window.__SELECTOR_APPLY_SETTINGS__ = function (next) {
+      window.__COLLECTOR_APPLY_SETTINGS__ = function (next) {
         if (!next || typeof next !== "object") return;
         settings = Object.assign({}, DEFAULTS, HOST_SETTINGS_BASE, next);
         if (settingsPanel) {
@@ -273,7 +276,7 @@
         }
         applyI18n();
       };
-      window.__SELECTOR_APPLY_LANG__ = function (next) {
+      window.__COLLECTOR_APPLY_LANG__ = function (next) {
         if (next !== "en" && next !== "zh") return;
         lang = next;
         applyI18n();
@@ -299,11 +302,11 @@
     chatPanel = null;
     layerHost = null;
     try {
-      if (window.__SELECTOR_DESTROY__ === destroy) delete window.__SELECTOR_DESTROY__;
-      delete window.__SELECTOR_ON_REACTIVATE__;
-      delete window.__SELECTOR_ON_NAVIGATION__;
-      delete window.__SELECTOR_APPLY_SETTINGS__;
-      delete window.__SELECTOR_APPLY_LANG__;
+      if (window.__COLLECTOR_DESTROY__ === destroy) delete window.__COLLECTOR_DESTROY__;
+      delete window.__COLLECTOR_ON_REACTIVATE__;
+      delete window.__COLLECTOR_ON_NAVIGATION__;
+      delete window.__COLLECTOR_APPLY_SETTINGS__;
+      delete window.__COLLECTOR_APPLY_LANG__;
     } catch (_) {}
     // Tell the Pro host to stop sticky re-open for this tab (X / shortcut off).
     if (HOST.onClosed) { try { HOST.onClosed(); } catch (_) {} }
@@ -325,7 +328,7 @@
       el.isContentEditable
     ));
   }
-  function ensureSelectorLayerHost() {
+  function ensureCollectorLayerHost() {
     if (layerHost && layerHost.isConnected) return layerHost;
     layerHost = document.createElement("div");
     layerHost.className = `${NS}-layer-host`;
@@ -334,8 +337,8 @@
     try { if (typeof layerHost.showPopover === "function") layerHost.showPopover(); } catch (_) {}
     return layerHost;
   }
-  function bringSelectorLayerToFront() {
-    const host = ensureSelectorLayerHost();
+  function bringCollectorLayerToFront() {
+    const host = ensureCollectorLayerHost();
     if (typeof host.showPopover === "function") {
       try {
         if (host.matches(":popover-open")) host.hidePopover();
@@ -346,17 +349,17 @@
     const root = document.documentElement || document.body;
     if (host.parentNode === root) root.appendChild(host);
   }
-  function mountSelectorSurface(surface) {
-    ensureSelectorLayerHost().appendChild(surface);
-    bringSelectorLayerToFront();
+  function mountCollectorSurface(surface) {
+    ensureCollectorLayerHost().appendChild(surface);
+    bringCollectorLayerToFront();
     return surface;
   }
-  function scheduleSelectorLayerRefresh() {
+  function scheduleCollectorLayerRefresh() {
     if (layerRafPending) return;
     layerRafPending = true;
     requestAnimationFrame(() => {
       layerRafPending = false;
-      const host = ensureSelectorLayerHost();
+      const host = ensureCollectorLayerHost();
       const surfaces = Array.from(document.querySelectorAll(`.${NS}-root`));
       const overlayClasses = [`${NS}-hover-box`, `${NS}-marquee`, `${NS}-sel-box`, `${NS}-sel-corner`, `${NS}-sel-label`, `${NS}-annotate-btn`];
       const panelClasses = [`${NS}-chat`, `${NS}-settings`, `${NS}-annotate-popover`, `${NS}-revprompt`];

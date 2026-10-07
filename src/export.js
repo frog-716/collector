@@ -30,7 +30,7 @@
   function showCopyCaptureError(code, err) {
     const key = screenshotErrorKey(code);
     const detail = err ? `${err.name || "Error"}: ${err.message || String(err)}` : "";
-    if (err) console.warn(`[Selector] ${t(key)}`, err);
+    if (err) console.warn(`[collector] ${t(key)}`, err);
     showCopyFeedback(t(key), true, detail);
   }
   function showClipboardFeedback(result, token, successKey) {
@@ -41,7 +41,7 @@
   }
   function showDownloadError(err) {
     const detail = err ? `${err.name || "Error"}: ${err.message || String(err)}` : "";
-    if (err) console.warn(`[Selector] ${t("errDownload")}`, err);
+    if (err) console.warn(`[collector] ${t("errDownload")}`, err);
     showCopyFeedback(t("errDownload"), true, detail);
   }
   async function copyPrompt() {
@@ -430,7 +430,7 @@
     const txt = document.createElement("div"); txt.className = `${NS}-revprompt-text`;
     body.appendChild(txt);
     revPanel.appendChild(head); revPanel.appendChild(body);
-    mountSelectorSurface(revPanel);
+    mountCollectorSurface(revPanel);
     revStream = { target: "", shown: 0, el: txt, timer: null };
     positionRevPanel();
   }
@@ -622,7 +622,7 @@
         }
         if (HOST.autoSaveScreenshots) throw new Error("Screenshot auto-save returned no result");
       } catch (err) {
-        console.warn("[Selector] host download failed", err);
+        console.warn("[collector] host download failed", err);
         if (HOST.autoSaveScreenshots) throw err;
       }
     }
@@ -632,7 +632,7 @@
       return result;
     } catch (err) {
       if (err && err.name === "AbortError") throw screenshotError("cancelled", err);
-      console.warn("[Selector] Save picker unavailable", err);
+      console.warn("[collector] Save picker unavailable", err);
     }
 
     showPendingScreenshotSave(blob, filename);
@@ -693,7 +693,7 @@
         ]
       : [
           `Screenshot file: ${filename}  (capture pending)`,
-          `Auto-save did not run — ask the user to click "Save PNG" in the Selector panel and pick a folder.`,
+          `Auto-save did not run — ask the user to click "Save PNG" in the collector panel and pick a folder.`,
           `After saving, locate it with:`,
           `  mdfind -name "${filename}"                              # macOS`,
           `  find ~ -name "${filename}" -mtime -1                   # Linux / WSL`,
@@ -757,21 +757,21 @@
   function showScreenshotError(code, err) {
     const key = screenshotErrorKey(code);
     const detail = err ? `${err.name || "Error"}: ${err.message || String(err)}` : "";
-    if (err) console.warn(`[Selector] ${t(key)}`, err);
+    if (err) console.warn(`[collector] ${t(key)}`, err);
     showScreenshotFeedback(t(key), true, detail);
   }
 
   function screenshotError(code, cause) {
     const err = new Error(cause && cause.message ? cause.message : code);
-    err.name = cause && cause.name ? cause.name : "SelectorScreenshotError";
-    err.selectorCode = code;
+    err.name = cause && cause.name ? cause.name : "CollectorScreenshotError";
+    err.collectorCode = code;
     err.cause = cause;
     return err;
   }
 
   function classifyScreenshotError(err, stage) {
     if (!err) return stage === "clipboard" ? "clipboard" : "capture";
-    if (err.selectorCode) return err.selectorCode;
+    if (err.collectorCode) return err.collectorCode;
     if (stage === "clipboard") return "clipboard";
     const name = err.name || "";
     const message = String(err.message || "").toLowerCase();
@@ -926,11 +926,11 @@
   async function screenshotHtmlBlob(text, imageBlob) {
     const imageUrl = await blobToDataUrl(imageBlob);
     return new Blob([
-      '<div data-selector-copy="screenshot-text">',
+      '<div data-collector-copy="screenshot-text">',
       '<pre style="white-space:pre-wrap;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 12px;">',
       escapeHtml(text),
       '</pre>',
-      '<img alt="Selector screenshot" src="',
+      '<img alt="collector screenshot" src="',
       imageUrl,
       '" style="max-width:100%;height:auto;">',
       '</div>',

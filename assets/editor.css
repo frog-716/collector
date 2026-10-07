@@ -36,7 +36,7 @@
 .ai-editor-layer-host > .ai-editor-sel-corner,
 .ai-editor-layer-host > .ai-editor-sel-label { pointer-events: none; }
 
-/* Every Selector surface sits at the browser's maximum author-layer depth.
+/* Every collector surface sits at the browser's maximum author-layer depth.
    Internal order is controlled by insertion order inside the layer host. */
 .ai-editor-root {
   z-index: 2147483647 !important;

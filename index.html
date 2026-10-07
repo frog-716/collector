@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function loadLang() {
     try {
-      var stored = localStorage.getItem("selector-install-lang");
+      var stored = localStorage.getItem("collector-install-lang");
       if (stored === "zh" || stored === "en") return stored;
     } catch (_) {}
     return /^zh\b/i.test(navigator.language || "") ? "zh" : "en";
@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function setLang(nextLang) {
     lang = nextLang === "zh" ? "zh" : "en";
-    try { localStorage.setItem("selector-install-lang", lang); } catch (_) {}
+    try { localStorage.setItem("collector-install-lang", lang); } catch (_) {}
     applyI18n();
   }
 
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <a class="pro-link" href="https://selector-pro.org/" target="_blank" rel="noopener" data-i18n="proLink">See a stronger Selector &rarr;</a>
   </div>
   <div class="footer">
-    <a href="https://github.com/oil-oil/selector" target="_blank">GitHub</a> · <span data-version></span>
+    <a href="https://github.com/frog-716/collector" target="_blank">GitHub</a> · <span data-version></span>
   </div>
 </div>
 </body>

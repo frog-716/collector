@@ -4,10 +4,11 @@
 
 **collector** is a bookmarklet for selecting web elements and copying structured context into Claude Code, Codex, Cursor, or any AI coding assistant.
 
-Forked from [oil-oil/selector](https://github.com/oil-oil/selector) (MIT). Two things changed in this fork:
+Forked from [oil-oil/selector](https://github.com/oil-oil/selector) (MIT). What changed in this fork:
 
-- Multi-select is bound to **⌘** (the macOS-native gesture) instead of Shift.
-- A written plan for capturing the JS-driven animations the current build cannot see — see [docs/animation-roadmap.md](docs/animation-roadmap.md).
+- Multi-select stays on **Shift**, the upstream shortcut; the ⌘ variant was removed.
+- Project-owned identifiers were renamed from `selector` to `collector` throughout (functions, globals, download filenames, storage keys).
+- Capturing JS-driven animations is scoped as the next upgrade, not implemented here — see [docs/animation-roadmap.md](docs/animation-roadmap.md).
 
 ## Install
 
@@ -24,9 +25,9 @@ Open any web page, click the **collector** bookmark.
 | Action | What it does |
 |---|---|
 | **Click** | Select an element |
-| **⌘ + Click** (or **Shift + Click**) | Add to / remove from selection |
+| **Shift + Click** | Add to / remove from selection |
 | **Drag** | Marquee select multiple elements |
-| **⌘ + Drag** | Add the marquee area to the current selection instead of replacing it |
+| **Shift + Drag** | Add the marquee area to the current selection instead of replacing it |
 | **↑ / ↓** | Navigate to parent / child element |
 | **← / →** | Navigate to previous / next sibling |
 | **✎ button** | Add per-element instruction |
@@ -113,7 +114,7 @@ git fetch upstream
 git merge upstream/main
 ```
 
-Internal identifiers (the `.ai-editor-*` CSS namespace, `mountSelectorSurface`, the install-page `localStorage` key) deliberately keep their original names — renaming them would break the upstream merge path for no functional gain.
+This fork renames project-owned identifiers from `selector` to `collector`. Two deliberate exceptions remain: the `.ai-editor-*` CSS namespace (renaming it would invalidate every cached bookmarklet payload), and browser/CSSOM vocabulary such as `querySelector`, `selectorText` and the locator-building helpers, which name a CSS selector rather than this project. Renaming the host seam to `window.__COLLECTOR_HOST__` also means the upstream Selector Pro extension can no longer inject into this build.
 
 ## License
 

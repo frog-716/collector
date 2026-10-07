@@ -15,7 +15,7 @@
     actions.appendChild(clearBtn); actions.appendChild(doneBtn); popover.appendChild(textarea); popover.appendChild(actions);
     const r = btn.getBoundingClientRect();
     popover.style.top = (r.bottom+6)+"px"; popover.style.right = Math.max(8, window.innerWidth-r.right)+"px";
-    mountSelectorSurface(popover); activePopover = popover; textarea.focus();
+    mountCollectorSurface(popover); activePopover = popover; textarea.focus();
   }
   function removeAnnotationPopover() { if (activePopover) { activePopover.remove(); activePopover = null; } }
 
@@ -301,7 +301,7 @@
     // Keep the in-page panel focused on daily use. Lifetime-license management
     // stays in the options page; Pro shows only the real activation shortcut.
     settingsPanel.appendChild(HOST.isExtension ? mkProSettingsSummary() : mkSettingsPromo());
-    mountSelectorSurface(settingsPanel);
+    mountCollectorSurface(settingsPanel);
     refreshProSettingsSummary();
     const cr = chatPanel.getBoundingClientRect();
     settingsPanel.style.bottom = (window.innerHeight - cr.top + 4) + "px";
@@ -406,7 +406,7 @@
     const markdownShortcut = HOST.pageShortcuts === true ? formatPageShortcut(settings.shortcutMarkdown) : (isMacPlatform() ? "\u2318M" : "Ctrl+M");
     const items = [
       `<span><kbd>Click</kbd> ${t("skSelect")}</span>`,
-      `<span><kbd>${isMacPlatform() ? "\u2318" : "Shift"}</kbd> ${t("skMulti")}</span>`,
+      `<span><kbd>Shift</kbd> ${t("skMulti")}</span>`,
       `<span><kbd>\u2190\u2191\u2192\u2193</kbd> ${t("skNavigate")}</span>`,
       `<span><kbd>${copyShortcut}</kbd> ${t("skCopy")}</span>`,
       `<span><kbd>${screenshotShortcut}</kbd> ${t("skScreenshot")}</span>`,
@@ -453,7 +453,7 @@
           <button class="${NS}-save-btn ${NS}-hidden" type="button">Save PNG</button>
         </div>
       </div>`;
-    mountSelectorSurface(chatPanel);
+    mountCollectorSurface(chatPanel);
     chatPanel.querySelector(`.${NS}-copy-btn`).onclick = () => copyPrompt();
     screenshotBtn = chatPanel.querySelector(`.${NS}-screenshot-btn`);
     screenshotBtn.onclick = () => captureScreenshot();

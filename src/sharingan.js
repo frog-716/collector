@@ -16,7 +16,7 @@
     const pageContext = currentPageContext();
     const colorScheme = (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
     const lines = [
-      "# Selector Sharingan Report",
+      "# collector Sharingan Report",
       "",
       `- Captured at: ${new Date().toISOString()}`,
       `- Page: ${location.href}`,
@@ -114,13 +114,13 @@
   function sharinganFilename() {
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
     const slug = safeFilename((document.title || location.hostname || "page").slice(0, 48)) || "page";
-    return `selector-sharingan-${slug}-${stamp}.md`;
+    return `collector-sharingan-${slug}-${stamp}.md`;
   }
 
   function screenshotFilename() {
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
     const slug = safeFilename((document.title || location.hostname || "page").slice(0, 42)) || "page";
-    return `selector-screenshot-${slug}-${stamp}.png`;
+    return `collector-screenshot-${slug}-${stamp}.png`;
   }
 
   function appendScreenshotReference(text, filename) {

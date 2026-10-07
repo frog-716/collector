@@ -1,6 +1,14 @@
-# 补齐 JS 动效抓取 — 路线图
+# 下一阶段待办：补齐 JS 动效抓取
 
-当前版本能完整抓取 CSS 动效，但抓不到由 JS 代码生成的动画（GSAP、Lottie、Framer Motion、Three.js / WebGL 等）。本文档记录现状边界、三条可行路径及其落地方式。
+> **状态：未实现。** 本文档是下一阶段项目升级的待办说明，阐述目标、范围与待办要点。当前版本只包含重命名与交互调整，**不包含**任何动画抓取能力。
+
+## 目标
+
+当前版本能完整抓取 CSS 动效，但抓不到由 JS 代码生成的动画（GSAP、Lottie、Framer Motion、Three.js / WebGL 等）。目标是把这部分补齐，让 collector 复制出的上下文对「JS 驱动的动效」同样可用。
+
+## 范围
+
+本文档记录现状边界、三条可行路径及其落地方式。
 
 ## 一、现状边界
 
@@ -18,7 +26,7 @@
 
 截图路径见 `src/export.js` 的 `captureViaDisplayMedia()`：`getDisplayMedia({ video: { frameRate: 1 } })` 之后只 `grabFrame()` 取一帧。**不是录屏**，没有时序信息。
 
-## 二、路径 A：`document.getAnimations()`（性价比最高，先做这个）
+## 二、路径 A：`document.getAnimations()`（性价比最高，建议先做）
 
 `document.getAnimations()` 是标准 Web Animations API，返回页面上**所有** `Animation` 对象——包括 CSS 动画、CSS 过渡，以及任何通过 `element.animate()` 创建的动画。
 
@@ -53,6 +61,15 @@ function collectWaapiRows(root, selected) {
 不覆盖：GSAP（默认用 rAF 直接改 style，不经过 WAAPI）、Lottie（渲染到 SVG/Canvas）、Three.js。
 
 接入点：在 `getAnimationRuntimeReport()` 里新增一个 section 即可，报告会自动走现有的 markdown 导出通道。
+
+### 待办要点
+
+落地时需处理四件事（草案本身未覆盖）：
+
+- **去重**：`CSSAnimation` / `CSSTransition` 实例要显式跳过，它们的参数已由 `collectCssAnimationRows()` 报过，否则每条 CSS 动画都会重复一遍。判断走 `animation.constructor.name`，不依赖全局构造器是否存在。
+- **时间轴**：额外读取 `animation.timeline`。非 `DocumentTimeline` 的（`ScrollTimeline` / `ViewTimeline`）应输出 `timeline: type=… source=… axis=… startOffset=… endOffset=…`——这正是静态样式读取看不到的部分。
+- **上限**：`document.getAnimations()` 最多取 240 个，输出上限 60 行；关键帧 JSON 单条截断到 700 字符。
+- **失败静默**：`getAnimations()`、`getTiming()`、`getKeyframes()` 各自包 try/catch，任一环节抛错只跳过该条动画，不影响主流程。
 
 ## 三、路径 B：针对具体库做 hook
 

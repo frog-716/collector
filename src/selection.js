@@ -82,7 +82,7 @@
   }
 
   // ── Hover overlay ────────────────────────────────────────────
-  function createHoverBox() { hoverBox = document.createElement("div"); hoverBox.className = `${NS}-root ${NS}-hover-box${HOST.isExtension ? ` ${NS}-pro-hover` : ""}`; mountSelectorSurface(hoverBox); }
+  function createHoverBox() { hoverBox = document.createElement("div"); hoverBox.className = `${NS}-root ${NS}-hover-box${HOST.isExtension ? ` ${NS}-pro-hover` : ""}`; mountCollectorSurface(hoverBox); }
   function showHover(el) {
     if (!el || isEditorElement(el) || selectedElements.includes(el)) { hoverBox.style.opacity = "0"; return; }
     const r = el.getBoundingClientRect();
@@ -91,11 +91,6 @@
   }
 
   // ── Mouse handling ───────────────────────────────────────────
-  // Multi-select modifier: ⌘ (Finder-style on macOS) with Shift kept for
-  // backward compatibility with the original shortcut. Caveat: on a real
-  // <a href> the browser itself handles ⌘+Click ("open in new tab") and a
-  // page script cannot cancel that — Shift stays the safe choice on links.
-  function isMultiSelectModifier(e) { return !!(e && (e.metaKey || e.shiftKey)); }
   function handleMouseMove(e) {
     if (minimized || paused) return;
     if (dragState) {
@@ -103,7 +98,7 @@
       if (!dragState.isDragging && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
         dragState.isDragging = true;
         dragState.marquee = document.createElement("div"); dragState.marquee.className = `${NS}-root ${NS}-marquee`;
-        mountSelectorSurface(dragState.marquee); scheduleSelectorLayerRefresh(); showHover(null);
+        mountCollectorSurface(dragState.marquee); scheduleCollectorLayerRefresh(); showHover(null);
       }
       if (dragState.isDragging) {
         dragState.marquee.style.left = Math.min(e.clientX, dragState.startX)+"px";
@@ -117,7 +112,7 @@
   }
   function handleMouseDown(e) {
     if (isEditorElement(e.target) || minimized || paused || e.button !== 0) return;
-    if (isMultiSelectModifier(e)) e.preventDefault();
+    if (e.shiftKey) e.preventDefault();
     dragState = { startX: e.clientX, startY: e.clientY, isDragging: false, marquee: null };
   }
   function handleMouseUp(e) {
@@ -125,7 +120,7 @@
     wasJustDragging = true;
     const mRect = dragState.marquee.getBoundingClientRect();
     dragState.marquee.remove(); dragState = null;
-    pushHistory(); if (!isMultiSelectModifier(e)) clearSelection();
+    pushHistory(); if (!e.shiftKey) clearSelection();
     document.querySelectorAll(`[${AI_ID}]`).forEach(el => {
       if (isEditorElement(el) || !isVisible(el) || !isMeaningful(el)) return;
       if (rectsIntersect(mRect, el.getBoundingClientRect())) addSelection(el);
@@ -139,7 +134,7 @@
     e.preventDefault(); e.stopPropagation(); removeAnnotationPopover();
     const sel = window.getSelection(); if (sel) sel.removeAllRanges();
     pushHistory(); const el = resolveNestedTargetFromSelection(e) || resolveTarget(resolveEventTarget(e));
-    if (isMultiSelectModifier(e)) toggleElement(el); else { clearUnannotatedSelections(); addSelection(el); }
+    if (e.shiftKey) toggleElement(el); else { clearUnannotatedSelections(); addSelection(el); }
     updateTags();
   }
 
@@ -147,7 +142,7 @@
   function createSelOverlay(el) {
     const aiId = el.getAttribute(AI_ID); if (selOverlays.has(aiId)) return;
     const box = document.createElement("div"); box.className = `${NS}-root ${NS}-sel-box${HOST.isExtension ? ` ${NS}-pro-selection` : ""}`;
-    const corners = [0,1,2,3].map(i => { const c = document.createElement("div"); c.className = `${NS}-root ${NS}-sel-corner${HOST.isExtension ? ` ${NS}-pro-corner` : ""}`; c.style.animationDelay = `${i*28}ms`; mountSelectorSurface(c); return c; });
+    const corners = [0,1,2,3].map(i => { const c = document.createElement("div"); c.className = `${NS}-root ${NS}-sel-corner${HOST.isExtension ? ` ${NS}-pro-corner` : ""}`; c.style.animationDelay = `${i*28}ms`; mountCollectorSurface(c); return c; });
     const label = document.createElement("div"); label.className = `${NS}-root ${NS}-sel-label${HOST.isExtension ? ` ${NS}-pro-selection-label` : ""}`; label.textContent = elementLabel(el);
     const annotateBtn = document.createElement("button");
     annotateBtn.className = `${NS}-root ${NS}-annotate-btn${HOST.isExtension ? ` ${NS}-pro-annotate` : ""}`; annotateBtn.title = t("addInstruction");
@@ -157,8 +152,8 @@
     markdownBtn.className = `${NS}-root ${NS}-annotate-btn ${NS}-markdown-btn${HOST.isExtension ? ` ${NS}-pro-annotate` : ""}`; markdownBtn.title = t("copyMarkdown");
     markdownBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>';
     markdownBtn.onclick = (e) => { e.stopPropagation(); e.preventDefault(); copyAsMarkdown([el]); };
-    mountSelectorSurface(box); mountSelectorSurface(label); mountSelectorSurface(annotateBtn); mountSelectorSurface(markdownBtn);
-    scheduleSelectorLayerRefresh();
+    mountCollectorSurface(box); mountCollectorSurface(label); mountCollectorSurface(annotateBtn); mountCollectorSurface(markdownBtn);
+    scheduleCollectorLayerRefresh();
     selOverlays.set(aiId, { box, corners, label, annotateBtn, markdownBtn }); positionSelOverlay(el);
   }
   function positionSelOverlay(el) {
@@ -212,8 +207,8 @@
   }
 
   function handleKeyDown(e) {
-    // Selector owns its shortcuts while selection is running, even when the
-    // page focus sits in an input/editor. Only Selector's own form controls
+    // collector owns its shortcuts while selection is running, even when the
+    // page focus sits in an input/editor. Only collector's own form controls
     // keep native typing behavior.
     if (isEditorElement(e.target) && isTypingTarget(e.target)) return;
     // The document listener runs in capture phase. Let the settings recorder
