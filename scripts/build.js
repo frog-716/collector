@@ -76,7 +76,9 @@ function build() {
   ensureDir(distAssets);
   copyFile(path.join(root, "index.html"), path.join(dist, "index.html"));
   copyFile(path.join(root, "assets", "editor.css"), path.join(distAssets, "editor.css"));
-  copyFile(path.join(root, "assets", "favicon.svg"), path.join(distAssets, "favicon.svg"));
+  for (const file of ["favicon-96.png", "apple-touch-icon.png"]) {
+    copyFile(path.join(root, "assets", file), path.join(distAssets, file));
+  }
   copyDir(path.join(root, "assets", "product-hunt"), path.join(distAssets, "product-hunt"));
   buildEditor();
 }
