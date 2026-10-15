@@ -16,14 +16,16 @@ git fetch upstream
 git merge upstream/main
 ```
 
-### 尚未合入的上游提交
+### 已合入的上游提交
 
 | 提交 | 日期 | 内容 |
 |---|---|---|
 | `52ea42b` | 2026-10-11 | 换用新的品牌图标（Oil 家族），新增多个 PNG，移除 `favicon.svg`，改 `index.html` 与 `scripts/build.js` 的引用 |
 | `0eb020b` | 2026-10-12 | 修正图标中选择框的居中 |
 
-两个提交的实质内容都是品牌图标资源。合入前需要判断：这些图标属于上游品牌资产，与本项目「不体现来源」的定位是否冲突。
+这两个提交的内容已并入本项目：图标资源就位、引用接线完成，品牌素材改名后存放于 `assets/brand/`。
+
+⚠️ **合入方式需要留意**：当时 `github.com` 直连不通（代理端口故障 + 直连超时），`git fetch upstream` 无法执行，这两个提交是通过 API 通道取回文件后手工落地的。因此**上游的 commit 没有进入本地 git 历史** —— `upstream/main` 仍停在 `d88e9a6`，`git log` 里看不到 `52ea42b` / `0eb020b`。文件内容与上游一致，但历史未对齐。网络恢复后建议执行一次 `git fetch upstream`。
 
 ### 上游的付费产品
 
@@ -42,6 +44,9 @@ src/                  编辑器源码，构建时按顺序拼接成单文件 boo
   context.js          元素定位：CSS 选择器、XPath、语义路径
 scripts/build.js      构建脚本，把 src/*.js 拼成 base64 载荷
 assets/               图标、编辑器样式、README 配图
+  brand/              品牌素材源文件（各尺寸 mark / icon）
+  favicon-96.png      安装页 favicon
+  apple-touch-icon.png 安装页 App 图标（页面顶部也用它）
 docs/                 文档
 index.html            安装页（拖拽书签）
 dist/                 构建产物，由 CI 生成，不入库
