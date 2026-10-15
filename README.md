@@ -4,10 +4,10 @@
 
 **collector** is a bookmarklet for selecting web elements and copying structured context into Claude Code, Codex, Cursor, or any AI coding assistant.
 
-Forked from [oil-oil/selector](https://github.com/oil-oil/selector) (MIT). What changed in this fork:
+Notable changes in this build:
 
-- Multi-select stays on **Shift**, the upstream shortcut; the ⌘ variant was removed.
-- Project-owned identifiers were renamed from `selector` to `collector` throughout (functions, globals, download filenames, storage keys).
+- Multi-select is bound to **Shift**; the ⌘ variant was removed.
+- Project-owned identifiers use `collector` throughout (functions, globals, download filenames, storage keys).
 - Capturing JS-driven animations is scoped as the next upgrade, not implemented here — see [docs/animation-roadmap.md](docs/animation-roadmap.md).
 
 ## Install
@@ -103,19 +103,6 @@ npm run build
 
 `scripts/build.js` parses the assembled payload on every build, so a syntax error in any `src/*.js` fragment fails the build instead of shipping a broken bookmarklet.
 
-## Upstream
-
-This is a fork of [oil-oil/selector](https://github.com/oil-oil/selector), which also ships a paid [Selector Pro](https://selector-pro.org/) with cross-tab activation, dialog-free captures and synced settings.
-
-The upstream repository is tracked as a git remote, so its fixes can be merged in:
-
-```bash
-git fetch upstream
-git merge upstream/main
-```
-
-This fork renames project-owned identifiers from `selector` to `collector`. Two deliberate exceptions remain: the `.ai-editor-*` CSS namespace (renaming it would invalidate every cached bookmarklet payload), and browser/CSSOM vocabulary such as `querySelector`, `selectorText` and the locator-building helpers, which name a CSS selector rather than this project. Renaming the host seam to `window.__COLLECTOR_HOST__` also means the upstream Selector Pro extension can no longer inject into this build.
-
 ## License
 
-MIT — see [LICENSE](LICENSE). Original work © the selector authors.
+MIT — see [LICENSE](LICENSE).
