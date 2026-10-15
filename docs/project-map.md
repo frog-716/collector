@@ -23,9 +23,9 @@ git merge upstream/main
 | `52ea42b` | 2026-10-11 | 换用新的品牌图标（Oil 家族），新增多个 PNG，移除 `favicon.svg`，改 `index.html` 与 `scripts/build.js` 的引用 |
 | `0eb020b` | 2026-10-12 | 修正图标中选择框的居中 |
 
-这两个提交的内容已并入本项目：图标资源就位、引用接线完成，品牌素材改名后存放于 `assets/brand/`。
+这两个提交的内容已并入本项目：图标资源就位、引用接线完成，品牌素材改名后存放于 `assets/brand/`。**git 历史也已对齐** —— `upstream/main` 现指向 `0eb020b`，合并提交为 `d08d9a2`，本地相对上游不再落后。
 
-⚠️ **合入方式需要留意**：当时 `github.com` 直连不通（代理端口故障 + 直连超时），`git fetch upstream` 无法执行，这两个提交是通过 API 通道取回文件后手工落地的。因此**上游的 commit 没有进入本地 git 历史** —— `upstream/main` 仍停在 `d88e9a6`，`git log` 里看不到 `52ea42b` / `0eb020b`。文件内容与上游一致，但历史未对齐。网络恢复后建议执行一次 `git fetch upstream`。
+> 过程备注：首次合入时 `github.com` 直连不通（代理端口故障），改动是经 API 通道取回文件后手工落地的；网络恢复后补做了一次真实的 `git merge upstream/main` 对齐历史。合并冲突只有 `index.html` 的 `<title>` 与 `<h1>`（保留本项目的 `collector` 命名），以及上游带进来的 `assets/brand/selector-*.png` 副本（与已改名的 `collector-*` 逐字节相同，已删除）。
 
 ### 上游的付费产品
 
